@@ -5,8 +5,13 @@ import (
 	"errors"
 )
 
-var ErrCyclicGraph = errors.New("The graph cannot be cyclic")
+// Errors relating to the DFSSorter.
+var (
+	ErrCyclicGraph = errors.New("The graph cannot be cyclic")
+)
 
+// DFSSorter topologically sorts a directed graph's nodes based on the
+// directed edges between them using the Depth-first search algorithm.
 type DFSSorter struct {
 	graph                *DirectedGraph
 	nodes                []Node
@@ -16,6 +21,9 @@ type DFSSorter struct {
 	discovered           map[Node]bool
 }
 
+// NewDFSSorter creates a topological sorter for the specified directed
+// graph's nodes based on the directed edges between them using the
+// Depth-first search algorithm.
 func NewDFSSorter(graph *DirectedGraph) *DFSSorter {
 	return &DFSSorter{
 		graph: graph,
@@ -36,6 +44,7 @@ func (s *DFSSorter) init() {
 
 }
 
+// Sort returns the nodes in topological order.
 func (s *DFSSorter) Sort() ([]Node, error) {
 	s.init()
 
@@ -92,6 +101,8 @@ func (s *DFSSorter) visit(node Node) error {
 	return nil
 }
 
+// DFSSort returns the graph's nodes in topological order based on the
+// directed edges between them using the Depth-first search algorithm.
 func (g *DirectedGraph) DFSSort() ([]Node, error) {
 	sorter := NewDFSSorter(g)
 	return sorter.Sort()

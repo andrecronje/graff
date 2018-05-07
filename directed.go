@@ -7,7 +7,7 @@ type DirectedGraph struct {
 	edges *directedEdgeList
 }
 
-// NewDirectedGraph creates a graph supporting directed edges between nodes.
+// NewDirectedGraph creates a graph of nodes with directed edges.
 func NewDirectedGraph() *DirectedGraph {
 	return &DirectedGraph{
 		graph: newGraph(),
@@ -15,7 +15,7 @@ func NewDirectedGraph() *DirectedGraph {
 	}
 }
 
-// Copy returns a new Directed Graph containing the same nodes and edges.
+// Copy returns a clone of the directed graph.
 func (g *DirectedGraph) Copy() *DirectedGraph {
 	return &DirectedGraph{
 		graph: g.graph.Copy(),
@@ -23,6 +23,7 @@ func (g *DirectedGraph) Copy() *DirectedGraph {
 	}
 }
 
+// EdgeCount returns the number of direced edges between nodes.
 func (g *DirectedGraph) EdgeCount() int {
 	return g.edges.Count()
 }
@@ -50,22 +51,32 @@ func (g *DirectedGraph) EdgeExists(from Node, to Node) bool {
 	return g.edges.Exists(from, to)
 }
 
+// HasPrecedingNodes checks whether the graph contains any directed
+// edges pointing to the node.
 func (g *DirectedGraph) HasPrecedingNodes(node Node) bool {
 	return g.edges.HasPrecedingNodes(node)
 }
 
+// PrecedingNodes returns the nodes belonging to directed edges pointing
+// towards the specified node.
 func (g *DirectedGraph) PrecedingNodes(node Node) []Node {
 	return g.edges.PrecedingNodes(node)
 }
 
+// HasSucceedingNodes checks whether the graph contains any directed
+// edges pointing from the node.
 func (g *DirectedGraph) HasSucceedingNodes(node Node) bool {
 	return g.edges.HasSucceedingNodes(node)
 }
 
+// SucceedingNodes returns the nodes belonging to directed edges pointing
+// from the specified node.
 func (g *DirectedGraph) SucceedingNodes(node Node) []Node {
 	return g.edges.SucceedingNodes(node)
 }
 
+// RootNodes finds the entry-point nodes to the graph, i.e. nodes without
+// preceding edges
 func (g *DirectedGraph) RootNodes() []Node {
 	rootNodes := make([]Node, 0)
 	for _, node := range g.Nodes() {

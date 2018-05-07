@@ -6,6 +6,8 @@ import (
 	"github.com/tmc/dot"
 )
 
+// DOTGraph returns a textual representation of the graph in the DOT graph
+// description language.
 func (g *DirectedGraph) DOTGraph() string {
 	graph := dot.NewGraph("G")
 	graph.SetType(dot.DIGRAPH)

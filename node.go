@@ -1,5 +1,6 @@
 package graff
 
+// Node represents a graph node.
 type Node = interface{}
 
 type nodeList struct {
