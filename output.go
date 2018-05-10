@@ -20,7 +20,7 @@ func (g *DirectedGraph) DOTGraph() string {
 	}
 
 	for fromNode, fromItem := range itemsByNode {
-		for _, toNode := range g.SucceedingNodes(fromNode) {
+		for _, toNode := range g.OutgoingEdges(fromNode) {
 			if toItem, ok := itemsByNode[toNode]; ok {
 				graph.AddEdge(dot.NewEdge(fromItem, toItem))
 			}

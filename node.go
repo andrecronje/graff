@@ -47,7 +47,7 @@ func (l *nodeList) indexOf(node Node) (index int, ok bool) {
 func (l *nodeList) Add(nodes ...Node) {
 	for _, node := range nodes {
 		if l.Exists(node) {
-			return
+			continue
 		}
 
 		l.nodes = append(l.nodes, node)
@@ -58,7 +58,7 @@ func (l *nodeList) Remove(nodes ...Node) {
 	for _, node := range nodes {
 		index, ok := l.indexOf(node)
 		if !ok {
-			return
+			continue
 		}
 
 		copy(l.nodes[index:], l.nodes[index+1:])

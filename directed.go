@@ -46,156 +46,105 @@ func (g *DirectedGraph) RemoveEdge(from Node, to Node) {
 	g.edges.Remove(from, to)
 }
 
+// HasEdges determines whether the graph contains any edges to or from the node.
+func (g *DirectedGraph) HasEdges(node Node) bool {
+	if g.HasIncomingEdges(node) {
+		return true
+	}
+	return g.HasOutgoingEdges(node)
+}
+
 // EdgeExists checks whether the edge exists within the graph.
 func (g *DirectedGraph) EdgeExists(from Node, to Node) bool {
 	return g.edges.Exists(from, to)
 }
 
-// HasPrecedingNodes checks whether the graph contains any directed
+// HasIncomingEdges checks whether the graph contains any directed
 // edges pointing to the node.
-func (g *DirectedGraph) HasPrecedingNodes(node Node) bool {
-	return g.edges.HasPrecedingNodes(node)
+func (g *DirectedGraph) HasIncomingEdges(node Node) bool {
+	return g.edges.HasIncomingEdges(node)
 }
 
-// PrecedingNodes returns the nodes belonging to directed edges pointing
+// IncomingEdges returns the nodes belonging to directed edges pointing
 // towards the specified node.
-func (g *DirectedGraph) PrecedingNodes(node Node) []Node {
-	return g.edges.PrecedingNodes(node)
+func (g *DirectedGraph) IncomingEdges(node Node) []Node {
+	return g.edges.IncomingEdges(node)
 }
 
-// HasSucceedingNodes checks whether the graph contains any directed
+// IncomingEdgeCount returns the number of edges pointing from the specified
+// node (indegree).
+func (g *DirectedGraph) IncomingEdgeCount(node Node) int {
+	return g.edges.IncomingEdgeCount(node)
+}
+
+// HasOutgoingEdges checks whether the graph contains any directed
 // edges pointing from the node.
-func (g *DirectedGraph) HasSucceedingNodes(node Node) bool {
-	return g.edges.HasSucceedingNodes(node)
+func (g *DirectedGraph) HasOutgoingEdges(node Node) bool {
+	return g.edges.HasOutgoingEdges(node)
 }
 
-// SucceedingNodes returns the nodes belonging to directed edges pointing
+// OutgoingEdges returns the nodes belonging to directed edges pointing
 // from the specified node.
-func (g *DirectedGraph) SucceedingNodes(node Node) []Node {
-	return g.edges.SucceedingNodes(node)
+func (g *DirectedGraph) OutgoingEdges(node Node) []Node {
+	return g.edges.OutgoingEdges(node)
 }
 
-// RootNodes finds the entry-point nodes to the graph, i.e. nodes without
-// preceding edges
+// OutgoingEdgeCount returns the number of edges pointing from the specified
+// node (outdegree).
+func (g *DirectedGraph) OutgoingEdgeCount(node Node) int {
+	return g.edges.OutgoingEdgeCount(node)
+}
+
+// RootNodes finds the entry-point nodes to the graph, i.e. those without
+// incoming edges.
 func (g *DirectedGraph) RootNodes() []Node {
-	rootNodes := make([]Node, 0)
+	results := make([]Node, 0)
 	for _, node := range g.Nodes() {
-		if !g.HasPrecedingNodes(node) {
-			rootNodes = append(rootNodes, node)
+		if !g.HasIncomingEdges(node) {
+			results = append(results, node)
 		}
 	}
-	return rootNodes
+	return results
 }
 
-type directedEdgeList struct {
-	succeedingEdges map[Node]*nodeList
-	precedingEdges  map[Node]*nodeList
-}
-
-func newDirectedEdgeList() *directedEdgeList {
-	return &directedEdgeList{
-		succeedingEdges: make(map[Node]*nodeList),
-		precedingEdges:  make(map[Node]*nodeList),
-	}
-}
-
-func (l *directedEdgeList) Copy() *directedEdgeList {
-	succeedingEdges := make(map[Node]*nodeList, len(l.succeedingEdges))
-	for node, edges := range l.succeedingEdges {
-		succeedingEdges[node] = edges.Copy()
-	}
-
-	precedingEdges := make(map[Node]*nodeList, len(l.precedingEdges))
-	for node, edges := range l.precedingEdges {
-		precedingEdges[node] = edges.Copy()
-	}
-
-	return &directedEdgeList{
-		succeedingEdges: succeedingEdges,
-		precedingEdges:  precedingEdges,
-	}
-}
-
-func (l *directedEdgeList) Count() int {
-	return len(l.succeedingEdges)
-}
-
-func (l *directedEdgeList) HasSucceedingNodes(node Node) bool {
-	_, ok := l.succeedingEdges[node]
-	return ok
-}
-
-func (l *directedEdgeList) succeedingNodeList(node Node, create bool) *nodeList {
-	if list, ok := l.succeedingEdges[node]; ok {
-		return list
-	}
-	if create {
-		list := newNodeList()
-		l.succeedingEdges[node] = list
-		return list
-	}
-	return nil
-}
-
-func (l *directedEdgeList) SucceedingNodes(node Node) []Node {
-	if list := l.succeedingNodeList(node, false); list != nil {
-		return list.Nodes()
-	}
-	return nil
-}
-
-func (l *directedEdgeList) HasPrecedingNodes(node Node) bool {
-	_, ok := l.precedingEdges[node]
-	return ok
-}
-
-func (l *directedEdgeList) precedingNodeList(node Node, create bool) *nodeList {
-	if list, ok := l.precedingEdges[node]; ok {
-		return list
-	}
-	if create {
-		list := newNodeList()
-		l.precedingEdges[node] = list
-		return list
-	}
-	return nil
-}
-
-func (l *directedEdgeList) PrecedingNodes(node Node) []Node {
-	if list := l.precedingNodeList(node, false); list != nil {
-		return list.Nodes()
-	}
-	return nil
-}
-
-func (l *directedEdgeList) Add(from Node, to Node) {
-	succeedingList := l.succeedingNodeList(from, true)
-	succeedingList.Add(to)
-
-	precedingList := l.precedingNodeList(to, true)
-	precedingList.Add(from)
-}
-
-func (l *directedEdgeList) Remove(from Node, to Node) {
-	if list := l.succeedingNodeList(from, false); list != nil {
-		list.Remove(to)
-
-		if list.Count() == 0 {
-			delete(l.succeedingEdges, from)
+// IsolatedNodes finds independent nodes in the graph, i.e. those without edges.
+func (g *DirectedGraph) IsolatedNodes() []Node {
+	results := make([]Node, 0)
+	for _, node := range g.Nodes() {
+		if !g.HasEdges(node) {
+			results = append(results, node)
 		}
 	}
-	if list := l.precedingNodeList(to, false); list != nil {
-		list.Remove(from)
-
-		if list.Count() == 0 {
-			delete(l.precedingEdges, to)
-		}
-	}
+	return results
 }
 
-func (l *directedEdgeList) Exists(from Node, to Node) bool {
-	if list := l.succeedingNodeList(from, false); list != nil {
-		return list.Exists(to)
+// AdjacencyMatrix returns a matrix indicating whether pairs of nodes are
+// adjacent or not within the graph.
+func (g *DirectedGraph) AdjacencyMatrix() map[Node]map[Node]bool {
+	matrix := make(map[Node]map[Node]bool, g.NodeCount())
+	for _, a := range g.Nodes() {
+		matrix[a] = make(map[Node]bool, g.NodeCount())
+
+		for _, b := range g.Nodes() {
+			matrix[a][b] = g.EdgeExists(a, b)
+		}
 	}
-	return false
+	return matrix
+}
+
+// RemoveTransitives removes any transitive edges so that as fewest possible
+// edges exist while matching the reachability of the original graph.
+func (g *DirectedGraph) RemoveTransitives() {
+	for _, a := range g.Nodes() {
+		for _, b := range g.Nodes() {
+			if !g.EdgeExists(a, b) {
+				continue
+			}
+			for _, c := range g.Nodes() {
+				if g.EdgeExists(b, c) {
+					g.RemoveEdge(a, c)
+				}
+			}
+		}
+	}
 }
