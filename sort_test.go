@@ -1,1 +1,37 @@
 package graff
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestDFSSorter(t *testing.T) {
+	graph := NewDirectedGraph()
+	graph.AddNodes(0, 1, 2, 3, 4, 5, 6, 7)
+	graph.AddEdge(0, 2)
+	graph.AddEdge(1, 2)
+	graph.AddEdge(1, 5)
+	graph.AddEdge(1, 6)
+	graph.AddEdge(2, 5)
+	graph.AddEdge(3, 5)
+	graph.AddEdge(5, 6)
+	graph.AddEdge(5, 7)
+
+	sorted, err := graph.DFSSort()
+
+	assert.NoError(t, err, "graph.DFSSort() error should be nil")
+	assert.Equal(t, []Node{4, 3, 1, 0, 2, 5, 7, 6}, sorted, "graph.DFSSort() nodes should equal [4, 3, 1, 0, 2, 5, 7, 6]")
+}
+
+func TestDFSSorterCyclic(t *testing.T) {
+	graph := NewDirectedGraph()
+	graph.AddNodes(0, 1)
+	graph.AddEdge(0, 1)
+	graph.AddEdge(1, 0)
+
+	sorted, err := graph.DFSSort()
+
+	assert.EqualError(t, ErrCyclicGraph, err.Error(), "graph.DFSSort() error should be ErrCyclicGraph")
+	assert.Nil(t, sorted, "graph.DFSSort() nodes should be nil")
+}

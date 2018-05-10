@@ -1,7 +1,6 @@
 package graff
 
 import (
-	"container/list"
 	"errors"
 )
 
@@ -13,12 +12,10 @@ var (
 // DFSSorter topologically sorts a directed graph's nodes based on the
 // directed edges between them using the Depth-first search algorithm.
 type DFSSorter struct {
-	graph                *DirectedGraph
-	sorted               []Node
-	undiscovered         *list.List
-	undiscoveredElements map[Node]*list.Element
-	visiting             map[Node]bool
-	discovered           map[Node]bool
+	graph      *DirectedGraph
+	sorted     []Node
+	visiting   map[Node]bool
+	discovered map[Node]bool
 }
 
 // NewDFSSorter returns a new DFS sorter.
@@ -32,14 +29,6 @@ func (s *DFSSorter) init() {
 	s.sorted = make([]Node, 0, s.graph.NodeCount())
 	s.visiting = make(map[Node]bool)
 	s.discovered = make(map[Node]bool, s.graph.NodeCount())
-
-	s.undiscovered = list.New()
-	s.undiscoveredElements = make(map[Node]*list.Element, s.graph.NodeCount())
-	for _, node := range s.graph.Nodes() {
-		element := s.undiscovered.PushFront(node)
-		s.undiscoveredElements[node] = element
-	}
-
 }
 
 // Sort returns the sorted nodes.
@@ -47,12 +36,9 @@ func (s *DFSSorter) Sort() ([]Node, error) {
 	s.init()
 
 	// > while there are unmarked nodes do
-	for s.undiscovered.Len() > 0 {
-		for e := s.undiscovered.Front(); e != nil; e = e.Next() {
-			node := e.Value.(Node)
-			if err := s.visit(node); err != nil {
-				return nil, err
-			}
+	for _, node := range s.graph.Nodes() {
+		if err := s.visit(node); err != nil {
+			return nil, err
 		}
 	}
 
@@ -81,20 +67,14 @@ func (s *DFSSorter) visit(node Node) error {
 	s.visiting[node] = true
 
 	// > for each node m with an edge from n to m do
-	outgoing := s.graph.OutgoingEdges(node)
-	for i := len(outgoing) - 1; i >= 0; i-- {
-		if err := s.visit(outgoing[i]); err != nil {
+	for _, outgoing := range s.graph.OutgoingEdges(node) {
+		if err := s.visit(outgoing); err != nil {
 			return err
 		}
 	}
 
 	s.discovered[node] = true
 	delete(s.visiting, node)
-
-	if element, ok := s.undiscoveredElements[node]; ok {
-		s.undiscovered.Remove(element)
-		delete(s.undiscoveredElements, node)
-	}
 
 	s.sorted = append(s.sorted, node)
 	return nil
