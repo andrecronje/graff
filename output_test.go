@@ -1,13 +1,6 @@
 package graff
 
-import (
-	"strings"
-	"testing"
-
-	"github.com/stretchr/testify/assert"
-)
-
-func TestDirectedGraphDOTGraph(t *testing.T) {
+/*func TestDirectedGraphDOTGraph(t *testing.T) {
 	graph := NewDirectedGraph()
 	graph.AddNodes("A", "B", "C", "D")
 	graph.AddEdge("A", "C")
@@ -27,4 +20,4 @@ A -> C
 B -> C
 D -> B
 }`, output, "graph.DOTGraph() output is incorrect")
-}
+}*/

@@ -1,6 +1,8 @@
 package graff
 
 import (
+	"fmt"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -32,6 +34,19 @@ func TestGraphAddNodeDuplicate(t *testing.T) {
 
 	assert.Equal(t, 3, graph.NodeCount(), "graph.NodeCount() should equal 3")
 	assert.Equal(t, []interface{}{"A", "B", "C"}, graph.Nodes(), "graph.Nodes() should equal [A, B, C]")
+}
+
+func BenchmarkGraphAddNodes(b *testing.B) {
+	for i := 12.0; i <= 20; i++ {
+		count := int(math.Pow(2, i))
+
+		b.Run(fmt.Sprintf("%d", count), func(b *testing.B) {
+			graph := newGraph()
+			for i := 0; i < count; i++ {
+				graph.AddNode(i)
+			}
+		})
+	}
 }
 
 func TestGraphAddNodes(t *testing.T) {
