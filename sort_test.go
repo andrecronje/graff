@@ -53,7 +53,7 @@ func TestCoffmanGrahamSorter(t *testing.T) {
 
 	sorted, err := graph.CoffmanGrahamSort(2)
 
-	assert.NoError(t, err, "graph.CoffmanGrahamSort(2) error should be nil")
+	assert.NoError(t, err, "graph.CoffmanGrahamSort(2)0 error should be nil")
 	assert.Equal(t, [][]Node{
 		[]Node{1, 0},
 		[]Node{5, 2},

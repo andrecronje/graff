@@ -77,6 +77,38 @@ func TestDirectedGraphRemoveEdgeMissing(t *testing.T) {
 	assert.Zero(t, graph.EdgeCount(), "graph.EdgeCount() should equal zero")
 }
 
+func TestDirectedGraphHasEdges(t *testing.T) {
+	graph := newTestDirectedGraph()
+	graph.AddEdge("A", "C")
+
+	assert.True(t, graph.HasEdges("A"), "graph.HasEdges(A) should equal true")
+	assert.False(t, graph.HasEdges("B"), "graph.HasEdges(B) should equal false")
+	assert.True(t, graph.HasEdges("C"), "graph.HasEdges(C) should equal true")
+	assert.False(t, graph.HasEdges("D"), "graph.HasEdges(D) should equal false")
+}
+
+func TestDirectedGraphIncomingEdgeCount(t *testing.T) {
+	graph := newTestDirectedGraph()
+	graph.AddEdge("A", "C")
+	graph.AddEdge("B", "C")
+
+	assert.Zero(t, graph.IncomingEdgeCount("A"), "graph.IncomingEdgeCount(A) should equal 0")
+	assert.Zero(t, graph.IncomingEdgeCount("B"), "graph.IncomingEdgeCount(B) should equal 0")
+	assert.Equal(t, 2, graph.IncomingEdgeCount("C"), "graph.IncomingEdgeCount(C) should equal 1")
+	assert.Zero(t, graph.IncomingEdgeCount("D"), "graph.IncomingEdgeCount(D) should equal 0")
+}
+
+func TestDirectedGraphOutgoingEdgeCount(t *testing.T) {
+	graph := newTestDirectedGraph()
+	graph.AddEdge("A", "B")
+	graph.AddEdge("A", "C")
+
+	assert.Equal(t, 2, graph.OutgoingEdgeCount("A"), "graph.OutgoingEdgeCount(A) should equal 2")
+	assert.Zero(t, graph.OutgoingEdgeCount("B"), "graph.OutgoingEdgeCount(B) should equal 0")
+	assert.Zero(t, graph.OutgoingEdgeCount("C"), "graph.OutgoingEdgeCount(C) should equal 0")
+	assert.Zero(t, graph.OutgoingEdgeCount("D"), "graph.OutgoingEdgeCount(D) should equal 0")
+}
+
 func TestDirectedGraphRootNodes(t *testing.T) {
 	graph := newTestDirectedGraph()
 	graph.AddEdge("A", "B")
@@ -86,4 +118,29 @@ func TestDirectedGraphRootNodes(t *testing.T) {
 	graph.AddEdge("F", "E")
 
 	assert.Equal(t, []Node{"A", "D", "F"}, graph.RootNodes(), "graph.RootNodes() should equal [A, D, F]")
+}
+
+func TestDirectedGraphIsolatedNodes(t *testing.T) {
+	graph := newTestDirectedGraph()
+	graph.AddEdge("A", "C")
+
+	assert.Equal(t, []Node{"B", "D"}, graph.IsolatedNodes(), "graph.IsolatedNodes() should equal [B, D]")
+}
+
+func TestDirectedGraphAdjacencyMatrix(t *testing.T) {
+	graph := newTestDirectedGraph()
+	graph.AddEdge("A", "C")
+	graph.AddEdge("A", "B")
+	graph.AddEdge("B", "D")
+	graph.AddEdge("C", "A")
+	graph.AddEdge("D", "D")
+
+	expected := map[interface{}]map[interface{}]bool{
+		"A": map[interface{}]bool{"A": false, "B": true, "C": true, "D": false},
+		"B": map[interface{}]bool{"A": false, "B": false, "C": false, "D": true},
+		"C": map[interface{}]bool{"A": true, "B": false, "C": false, "D": false},
+		"D": map[interface{}]bool{"D": true, "A": false, "B": false, "C": false},
+	}
+
+	assert.Equal(t, expected, graph.AdjacencyMatrix(), "graph.AdjacencyMatrix() should equal [B, D]")
 }
